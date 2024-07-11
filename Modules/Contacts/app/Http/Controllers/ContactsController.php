@@ -3,10 +3,9 @@
 namespace Modules\Contacts\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Modules\Contacts\Models\Contacts;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Response;
 
 class ContactsController extends Controller
 {
@@ -15,90 +14,65 @@ class ContactsController extends Controller
      */
     public function index()
     {
-        return view('contacts::index');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('contacts::create');
+        $contacts = Contacts::all();
+        return response()->json($contacts);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        // Validar los datos de entrada
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:60',
-            'last_name' => 'required|string|max:60',
-            'email' => 'nullable|email|max:150',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:contacts,email',
             'phone' => 'nullable|string|max:20',
-            'workspace_id' => 'nullable|exists:workspaces,id',
-            'custom_attributes' => 'nullable|json',
+            // otros campos de validación si es necesario
         ]);
 
-        // Crear un nuevo contacto
-        $contact = Contacts::create($validatedData);
+        $contact = Contacts::create($validated);
 
-        // Redirigir a la lista de contactos con un mensaje de éxito
-        return redirect()->route('contacts.index')->with('success', 'Contact created successfully.');
+        return response()->json($contact, Response::HTTP_CREATED);
     }
 
     /**
-     * Show the specified resource.
+     * Display the specified resource.
      */
     public function show($id)
     {
         $contact = Contacts::findOrFail($id);
-        return view('contacts::show', compact('contact'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $contact = Contacts::findOrFail($id);
-        return view('contacts::edit', compact('contact'));
+        return response()->json($contact);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request, $id)
     {
-        // Validar los datos de entrada
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:60',
-            'last_name' => 'required|string|max:60',
-            'email' => 'nullable|email|max:150',
+        $contact = Contacts::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:contacts,email,' . $contact->id,
             'phone' => 'nullable|string|max:20',
-            'workspace_id' => 'nullable|exists:workspaces,id',
-            'custom_attributes' => 'nullable|json',
+            // otros campos de validación si es necesario
         ]);
 
-        // Buscar el contacto y actualizarlo
-        $contact = Contacts::findOrFail($id);
-        $contact->update($validatedData);
+        $contact->update($validated);
 
-        // Redirigir a la lista de contactos con un mensaje de éxito
-        return redirect()->route('contacts.index')->with('success', 'Contact updated successfully.');
+        return response()->json($contact);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy($id)
     {
-        // Buscar y eliminar el contacto
         $contact = Contacts::findOrFail($id);
         $contact->delete();
 
-        // Redirigir a la lista de contactos con un mensaje de éxito
-        return redirect()->route('contacts.index')->with('success', 'Contact deleted successfully.');
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }
