@@ -68,11 +68,20 @@ class ContactsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id = null)
     {
-        $contact = Contacts::findOrFail($id);
-        $contact->delete();
-
+        if ($id) {
+            // Eliminar un solo contacto
+            $contact = Contacts::findOrFail($id);
+            $contact->delete();
+        } else {
+            // Eliminar múltiples contactos
+            $ids = $request->input('ids');
+            if ($ids) {
+                Contacts::whereIn('id', $ids)->delete();
+            }
+        }
+    
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

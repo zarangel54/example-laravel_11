@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('list_items', function (Blueprint $table) {
+        Schema::create('list_contacts_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('list_id')->constrained('lists')->onDelete('cascade');
-            $table->integer('item_id');
-            $table->string('item_type', 50); // 'contacts', 'companies', 'deals'
+            $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('list_items');
+        Schema::dropIfExists('list_contacts_items');
     }
 };

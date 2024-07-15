@@ -16,6 +16,7 @@ use Modules\Contacts\Http\Controllers\ContactsController;
 
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     Route::apiResource('contacts', ContactsController::class)->names('contacts');
+    Route::delete('contacts/{id?}', [ContactsController::class, 'destroy']);
 });
 
 
