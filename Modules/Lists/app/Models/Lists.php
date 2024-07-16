@@ -57,4 +57,3 @@ class Lists extends Model
   //      return ListsFactory::new();
   //  }
 }
-        
