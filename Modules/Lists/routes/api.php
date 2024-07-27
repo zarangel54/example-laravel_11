@@ -16,6 +16,7 @@ use Modules\Lists\Http\Controllers\ListContactsItemsController;
 */
 
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
+    Route::get('/lists', [ListsController::class, 'index']);
     Route::apiResource('lists', ListsController::class)->names('lists');
 
     // Ruta para agregar contactos a una lista
@@ -27,4 +28,10 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     // Rutas para agregar y eliminar múltiples contactos
     Route::post('lists/{list}/contacts', [ListContactsItemsController::class, 'store']);
     Route::delete('lists/{list}/contacts', [ListContactsItemsController::class, 'destroy']);
+
+    // Ruta para obtener las listas de un contacto específico
+    Route::get('contacts/{contact}/lists', [ListsController::class, 'getContactLists'])->name('contacts.lists');
+    
+    Route::post('contacts/{contact}/add-to-list', [ListContactsItemsController::class, 'addContactToList']);
+    Route::post('contacts/{contact}/add-to-list', [ListContactsItemsController::class, 'addContactToList']);
 });

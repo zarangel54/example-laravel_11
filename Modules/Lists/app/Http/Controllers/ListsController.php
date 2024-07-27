@@ -43,9 +43,6 @@ class ListsController extends Controller
     
         return response()->json($list, Response::HTTP_CREATED);
     }
-    
-
-
 
     /**
      * Show the specified resource.
@@ -83,26 +80,18 @@ class ListsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, $listId)
+    public function destroy($listId)
     {
-        $request->validate([
-            'contacts' => 'required|array',
-            'contacts.*.contact_id' => 'required|exists:list_contacts_items,contact_id',
-        ]);
-    
         $list = Lists::findOrFail($listId);
-    
-        $contacts = $request->input('contacts');
-    
-        foreach ($contacts as $contact) {
-            ListContactItem::where('list_id', $list->id)
-                ->where('contact_id', $contact['contact_id'])
-                ->delete();
-        }
-    
-        return response()->json(['message' => 'Contacts removed from list successfully'], 200);
-    }
 
+        // Eliminar todos los ítems relacionados
+        ListContactItem::where('list_id', $listId)->delete();
+
+        // Eliminar la lista
+        $list->delete();
+
+        return response()->json(['message' => 'List and related contacts removed successfully'], Response::HTTP_NO_CONTENT);
+    }
 
     /**
      * Get items for a specific list.
@@ -128,4 +117,18 @@ class ListsController extends Controller
             'items' => $items
         ]);
     }
+
+
+
+    public function getContactLists($contactId)
+    {
+        // Obtén las listas en las que el contacto específico está almacenado
+        $lists = Lists::whereHas('contactItems', function($query) use ($contactId) {
+            $query->where('contact_id', $contactId);
+        })->get();
+
+        return response()->json($lists);
+    }
+
+
 }

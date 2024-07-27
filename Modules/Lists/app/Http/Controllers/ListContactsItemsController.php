@@ -97,4 +97,25 @@ class ListContactsItemsController extends Controller
 
         return response()->json(['message' => 'Contacts removed from list successfully'], 200);
     }
+
+
+
+    public function addContactToList(Request $request, $contactId)
+{
+    $request->validate([
+        'list_id' => 'required|exists:lists,id',
+    ]);
+
+    $listId = $request->input('list_id');
+
+    ListContactItem::create([
+        'list_id' => $listId,
+        'contact_id' => $contactId,
+    ]);
+
+    return response()->json(['message' => 'Contact added to list successfully'], 200);
+}
+
+
+
 }
